@@ -137,6 +137,6 @@
         let intentosFallidos = 0;
 
         if (!inventarioDB || inventarioDB.length === 0) {
-            inventarioDB = listaOficial.map(nombre => ({ nombre: nombre, stock: 0, foto: nombre + ".PNG" }));
+            inventarioDB = listaOficial.map(nombre => ({ nombre: nombre, stock: 0, foto: "imágenes/" + nombre + ".PNG" }));
             localStorage.setItem('inventario_agricovet_oficial', JSON.stringify(inventarioDB));
         
