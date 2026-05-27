@@ -37,96 +37,9 @@
     </style>
 </head>
 <body>
-    <div class="logo-container">
-        <img src="agricovet.png" alt="Logo Agricovet" onerror="this.style.display='none'">
-        <h1 style="color: #2c5e3b; margin-top: 10px; font-size: 24px;">Agricovet de Guatemala</h1>
-    </div>
-
-    <!-- PANEL LOGIN -->
-    <div id="panel-login" class="contenedor">
-        <h2>Iniciar Sesión</h2>
-        <input type="email" id="login-correo" placeholder="Correo electrónico" required>
-        <input type="password" id="login-pass" placeholder="Contraseña" required>
-        <button onclick="iniciarSesion()">Entrar</button>
-        <p id="login-error" class="error">Correo o contraseña incorrectos.</p>
-        <span class="link" onclick="mostrarRegistro()">¿Nuevo en el equipo? Regístrate aquí</span>
-    </div>
-
-    <!-- PANEL REGISTRO -->
-    <div id="panel-registro" class="contenedor" style="display: none;">
-        <h2>Registrar Nuevo Usuario</h2>
-        
-        <div id="paso-registro" style="display: block;">
-            <input type="email" id="reg-correo" placeholder="Correo electrónico" required>
-            <small style="color: #666; display: block; text-align: left; margin-top: -5px;">Ej: usuario@gmail.com</small>
-            
-            <input type="password" id="reg-pass" placeholder="Crear Contraseña" oninput="validarContraseña()" required>
-            
-            <div class="requisitos">
-                <div class="requisito incumplido" id="req-largo">
-                    <span id="icon-largo">✗</span> Mínimo 8 caracteres
-                </div>
-                <div class="requisito incumplido" id="req-mayuscula">
-                    <span id="icon-mayuscula">✗</span> Al menos una mayúscula
-                </div>
-                <div class="requisito incumplido" id="req-numero">
-                    <span id="icon-numero">✗</span> Al menos un número
-                </div>
-                <div class="requisito incumplido" id="req-especial">
-                    <span id="icon-especial">✗</span> Al menos un carácter especial (!@#$%)
-                </div>
-            </div>
-
-            <input type="password" id="reg-pass-conf" placeholder="Confirmar Contraseña" required>
-
-            <button onclick="enviarCodigoVerificacion()" style="background-color: #e0ca9e; color: black;">Siguiente</button>
-            <p id="reg-error" class="error"></p>
-            <p id="reg-cargando" class="advertencia">Enviando código de verificación...</p>
-        </div>
-
-        <!-- PASO VERIFICACIÓN -->
-        <div id="paso-verificacion" style="display: none;">
-            <div class="codigo-verif">
-                <h3 style="margin-top: 0; color: #2c5e3b;">Verifica tu Correo</h3>
-                <p id="correo-verif-mostrar" style="color: #666; font-size: 14px;"></p>
-                <p style="font-size: 12px; color: #999;">Hemos enviado un código a tu correo. Revisa spam si no lo ves.</p>
-                <input type="text" id="codigo-verif" placeholder="Ingresa el código de 6 dígitos" maxlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                <small style="color: #666; display: block; text-align: center; margin-top: 5px;" id="contador-reintentos">Reintentos: 3/3</small>
-            </div>
-
-            <button onclick="verificarCodigo()" style="background-color: #28a745;">Verificar Código</button>
-            <button onclick="volverAlRegistro()" style="background-color: #6c757d; margin-top: 5px;">Volver</button>
-            <button onclick="reenviarCodigo()" style="background-color: #17a2b8; margin-top: 5px;">Reenviar Código</button>
-            <p id="verif-error" class="error"></p>
-            <p id="verif-exito" class="exito">¡Código correcto! Completando registro...</p>
-        </div>
-
-        <span class="link" onclick="mostrarLogin()" style="margin-top: 10px;">Volver a Iniciar Sesión</span>
-    </div>
-
-    <!-- PANEL INVENTARIO -->
-    <div id="panel-inventario" class="inventario-container">
-        <div class="header-inv">
-            <h2 style="margin: 0; color: #2c5e3b;">Control de Inventario</h2>
-            <span style="font-size: 14px; color: #666;">Usuario: <strong id="usuario-activo"></strong></span>
-            <button class="btn-salir btn-accion" onclick="cerrarSesion()">Cerrar Sesión</button>
-        </div>
-
-        <div id="panel-admin" style="display: none;">
-            <h3>Agregar Nuevo Producto Extra</h3>
-            <input type="text" id="nuevo-nombre" placeholder="Nombre exacto del producto">
-            <button onclick="agregarProducto()">Añadir al Catálogo</button>
-        </div>
-
-        <input type="text" id="buscador" placeholder="🔍 Buscar producto por nombre..." onkeyup="filtrarTabla()">
-        <div class="tabla-responsive">
-            <div id="contenedor-tabla"></div>
-        </div>
-    </div>
-
     <script>
         const CORREO_ADMIN = "seseffff942@gmail.com";
-        const listaOficial = ["Legatus mixx 30 OD litro", "Leñador 16 EW galón", "Dimaxine 72 SL galon", "Terraquat 20 SL galón", "Terraquat 20 SL litro", "Anorak 60 EC litro", "Duplexone 20 SL litro", "Leñador 16 EW 1 litro", "Revolver 36 5 SL litro", "Kaindor plus 30 SC litro", "SEMENTHAL 30 4 SL Caneca", "Torban 30 4 SL Caneca", "Triatleta 30 EW litro", "Nicogol 4 OD LITRO", "Dimaxine 72 SL litro", "Semental 16,5 SL litro", "Cegar 15 SL litro", "Azotela Max 85", "PILOT 56G 48X3", "Podador 60 WG 10X10gr", "Lasonate 90 SP 100 gr", "Revolver 36 5 SL caneca", "Torban 30 4 SL litro", "Coriplus 10 gr", "Lombrifin 10 gr", "Oxiplus Vitaminado 10 gr", "Socofin BD 10gr", "Vita vet plus 10gr", "Chemiestress 10gr", "Tilosin plus 25 gr", "Oxiplus Vitaminado 25 gr", "Cori plus 100 gr", "Socofin BD 100 gr", "Vita vet Plus 100 gr", "Lombrifin 100 gr", "Oxiplus Vitaminado 100 gr", "Tilosin 10 ml", "Socofin drog 10 ml", "Tilosin 25 ml", "Socofin drog 25 ml", "Tilosin 100 ml", "Nexlabet LA 30.1-60kg", "Nexlabet LA 7.6-15kg", "Nexlabet LA 15-30kg", "Dexametasona 20 ml", "Curabichera 400 ml", "Vitel 100 gr", "Vitel 15 gr", "Multipack 26/52 150 gr", "Multipack 26 52 15 gr", "Trimsulfa plus 100 gr", "Trinsulfa Plus 15 gr", "Electrolitos y Vitaminas 100 gr", "Electrolitos y Vitaminas 20 gr", "Broximicina 100 gr", "Fulmisarn spray 60 ml", "Shampoo Pets 250ml", "Vermimax plus 100 Tabletas", "Jabón PET Gold Barra", "Simparica trio 20-40kg", "Simparica trio 10-20kg", "Simparica trio 5-10kg", "Broncowell 100 gr", "Oxyfarm con electrolitos 100 gr", "Caja oxyfarm 20 grs", "All Trompa 454 gr", "All Trompa 100 gr", "Oxyfarm inyectable 10 ml", "Oxyfarm inyectable 50ml", "Oxyfarm inyectable 100 ml", "Oxyfarm inyectable 250 ml", "Pujantex 250 ml", "Vita B12 con fósforo 250 ml", "Ferradox plus 100 ml", "Neocan 120ml", "Neocan 240ml", "Defender 10ml", "Defender 50 ml", "Defender 100 ml", "Ferradox plus 10 ml", "tigent 20 ml", "Tigent 100ml", "Proteizoo plus 20ml", "Proteizoo Plus 250ml", "Ganazoo DP 20ml", "Bioxil 7% 500ml", "Dipiron 500 30 ml", "Labimin 500 ml", "Iverplus La 10ml 1%", "Iverplus la 100 ml 1%", "Iverplus La 500ml 1%", "Iverplus 500 4%", "Farma-Tecnimicina 50ml", "Farma-tecnimicina 100ml", "Farma-tecnimicina LA 10ml", "Farma-tecnimicina LA 50ml", "Farma-tecnimicina LA 100ml", "Oxitetraciclina plus 250ml", "Oxitetraciclina plus 100 ml", "Oxitetraciclina plus 50ml", "Oxitetraciclina plus 10ml", "verrugan 20 ml", "verrugan plus 30 ml", "Oxitocina 10ml", "Ectogan Pipeta Spot on", "Ectogan pour On LITRO", "Borogluconato de calcio 250 ml", "Solumin 250ml", "Instavit 500ml", "Leche en polvo para Ternero", "Nuvan 1L", "Nuvan 100ml", "Rata Quilla Sb caja", "JB Matagusano", "Impacto spray 263 gr", "Jeringa 1 ml 100U", "Jeringa 3 ml 100U", "Jeringa 5 ml 100U", "Jeringa 10ml 100U", "Lannate 100 ml", "mirex 250 grs", "mirex 500 grs", "Broncobion maxx 30 ml", "Mielita Vip", "Anticion anticonceptivo", "Ccipermetrina 25 EC 100ml", "Ccipermetrina 25 EC 250", "Ccipermetrina 25 EC 500ml", "Ccipermetrina 25 EC 1LT", "CPF 2DP", "FOLIAR PLUS", "PIKUDO 20 SC"];
+        const listaOficial = ["Legatus mixx 30 OD litro", "Leñador 16 EW galón", /* ...resto de tu lista... */];
 
         let usuariosDB = JSON.parse(localStorage.getItem('usuarios_agricovet_v2')) || {};
         let inventarioDB = JSON.parse(localStorage.getItem('inventario_agricovet_oficial'));
@@ -141,187 +54,35 @@
             localStorage.setItem('inventario_agricovet_oficial', JSON.stringify(inventarioDB));
         }
 
-        function validarContraseña() {
-            let pass = document.getElementById('reg-pass').value;
+        // --- Funciones de inicio de sesión ---
+        function iniciarSesion() {
+            let correo = document.getElementById('login-correo').value.toLowerCase().trim();
+            let pass = document.getElementById('login-pass').value;
             
-            let largo = pass.length >= 8;
-            let mayuscula = /[A-Z]/.test(pass);
-            let numero = /[0-9]/.test(pass);
-            let especial = /[!@#$%^&*]/.test(pass);
-
-            document.getElementById('req-largo').classList.toggle('cumplido', largo);
-            document.getElementById('req-largo').classList.toggle('incumplido', !largo);
-            document.getElementById('icon-largo').innerText = largo ? '✓' : '✗';
-
-            document.getElementById('req-mayuscula').classList.toggle('cumplido', mayuscula);
-            document.getElementById('req-mayuscula').classList.toggle('incumplido', !mayuscula);
-            document.getElementById('icon-mayuscula').innerText = mayuscula ? '✓' : '✗';
-
-            document.getElementById('req-numero').classList.toggle('cumplido', numero);
-            document.getElementById('req-numero').classList.toggle('incumplido', !numero);
-            document.getElementById('icon-numero').innerText = numero ? '✓' : '✗';
-
-            document.getElementById('req-especial').classList.toggle('cumplido', especial);
-            document.getElementById('req-especial').classList.toggle('incumplido', !especial);
-            document.getElementById('icon-especial').innerText = especial ? '✓' : '✗';
-
-            return largo && mayuscula && numero && especial;
-        }
-
-        function validarCorreo(correo) {
-            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return regex.test(correo);
-        }
-
-        function generarCodigoVerificacion() {
-            return Math.floor(100000 + Math.random() * 900000).toString();
-        }
-
-        function mostrarRegistro() {
-            document.getElementById('panel-login').style.display = 'none';
-            document.getElementById('panel-registro').style.display = 'block';
-            document.getElementById('paso-registro').style.display = 'block';
-            document.getElementById('paso-verificacion').style.display = 'none';
-            limpiarMensajes();
-        }
-
-        function mostrarLogin() {
-            document.getElementById('panel-registro').style.display = 'none';
-            document.getElementById('panel-login').style.display = 'block';
-            limpiarMensajes();
-        }
-
-        function limpiarMensajes() {
-            document.getElementById('login-error').style.display = 'none';
-            document.getElementById('reg-error').style.display = 'none';
-            document.getElementById('verif-error').style.display = 'none';
-            document.getElementById('verif-exito').style.display = 'none';
-            document.getElementById('reg-cargando').style.display = 'none';
-        }
-
-        function enviarCodigoVerificacion() {
-            let correo = document.getElementById('reg-correo').value.toLowerCase().trim();
-            let pass = document.getElementById('reg-pass').value;
-            let passConf = document.getElementById('reg-pass-conf').value;
-
-            document.getElementById('reg-error').style.display = 'none';
-
-            if (!correo || !pass || !passConf) {
-                document.getElementById('reg-error').innerText = "Completa todos los campos.";
-                document.getElementById('reg-error').style.display = 'block';
-                return;
+            if (usuariosDB[correo] && usuariosDB[correo].password === pass) {
+                document.getElementById('panel-login').style.display = 'none';
+                document.getElementById('panel-inventario').style.display = 'block';
+                document.getElementById('usuario-activo').innerText = correo;
+                if (correo === CORREO_ADMIN) document.getElementById('panel-admin').style.display = 'block';
+                renderizarTabla();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
             }
-
-            if (!validarCorreo(correo)) {
-                document.getElementById('reg-error').innerText = "Correo inválido. Usa formato: usuario@dominio.com";
-                document.getElementById('reg-error').style.display = 'block';
-                return;
-            }
-
-            if (usuariosDB[correo]) {
-                document.getElementById('reg-error').innerText = "Este correo ya está registrado.";
-                document.getElementById('reg-error').style.display = 'block';
-                return;
-            }
-
-            if (!validarContraseña()) {
-                document.getElementById('reg-error').innerText = "La contraseña no cumple los requisitos.";
-                document.getElementById('reg-error').style.display = 'block';
-                return;
-            }
-
-            if (pass !== passConf) {
-                document.getElementById('reg-error').innerText = "Las contraseñas no coinciden.";
-                document.getElementById('reg-error').style.display = 'block';
-                return;
-            }
-
-            codigoEnviadoActual = generarCodigoVerificacion();
-            correoEnVerificacion = correo;
-            contrasenaEnVerificacion = pass;
-            intentosFallidos = 0;
-
-            document.getElementById('reg-cargando').style.display = 'block';
-
-            enviarEmailVerificacion(correo, codigoEnviadoActual);
         }
 
-        function enviarEmailVerificacion(correo, codigo) {
-            fetch('https://formspree.io/f/xlgvoyav', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: correo,
-                    codigo: codigo,
-                    asunto: "Código de Verificación - Agricovet Guatemala"
-                })
-            })
-            .then(response => {
-                document.getElementById('reg-cargando').style.display = 'none';
-                
-                if (response.ok) {
-                    document.getElementById('paso-registro').style.display = 'none';
-                    document.getElementById('paso-verificacion').style.display = 'block';
-                    document.getElementById('correo-verif-mostrar').innerText = `Código enviado a: ${correo}`;
-                    document.getElementById('codigo-verif').focus();
-                    
-                    console.log('Código para testing:', codigo);
-                } else {
-                    document.getElementById('reg-error').innerText = "Error al enviar el código. Intenta de nuevo.";
-                    document.getElementById('reg-error').style.display = 'block';
-                }
-            })
-            .catch(error => {
-                document.getElementById('reg-cargando').style.display = 'none';
-                document.getElementById('reg-error').innerText = "Error de conexión. Verifica tu internet.";
-                document.getElementById('reg-error').style.display = 'block';
-            });
-        }
+        function cerrarSesion() { location.reload(); }
 
-        function verificarCodigo() {
-            let codigoIngresado = document.getElementById('codigo-verif').value;
-            document.getElementById('verif-error').style.display = 'none';
-
-            if (codigoIngresado === "") {
-                document.getElementById('verif-error').innerText = "Ingresa el código.";
-                document.getElementById('verif-error').style.display = 'block';
-                return;
-            }
-
-            if (codigoIngresado !== codigoEnviadoActual) {
-                intentosFallidos++;
-                let reintentos = 3 - intentosFallidos;
-                
-                if (reintentos <= 0) {
-                    document.getElementById('verif-error').innerText = "Agotaste los intentos. Solicita un nuevo código.";
-                    document.getElementById('verif-error').style.display = 'block';
-                    document.getElementById('codigo-verif').disabled = true;
-                    return;
-                }
-
-                document.getElementById('verif-error').innerText = `Código incorrecto. Reintentos: ${reintentos}/3`;
-                document.getElementById('verif-error').style.display = 'block';
-                document.getElementById('contador-reintentos').innerText = `Reintentos: ${reintentos}/3`;
-                return;
-            }
-
-            document.getElementById('verif-exito').style.display = 'block';
-            
-            usuariosDB[correoEnVerificacion] = {
-                password: contrasenaEnVerificacion,
-                registrado_en: new Date().toISOString(),
-                verificado: true
-            };
-            localStorage.setItem('usuarios_agricovet_v2', JSON.stringify(usuariosDB));
-
-            setTimeout(() => {
-                mostrarLogin();
-                alert('¡Registro completado! Ya puedes iniciar sesión.');
-            }, 1500);
-        }
-
+        // --- Funciones de registro y verificación ---
         function reenviarCodigo() {
             if (!correoEnVerificacion) return;
-            
             codigoEnviadoActual = generarCodigoVerificacion();
-            i
+            intentosFallidos = 0;
+            document.getElementById('codigo-verif').value = "";
+            document.getElementById('contador-reintentos').innerText = "Reintentos: 3/3";
+            enviarEmailVerificacion(correoEnVerificacion, codigoEnviadoActual);
+        }
+
+        // ... (resto de tus funciones: enviarCodigoVerificacion, verificarCodigo, etc.)
+    </script>
+</body>
+</html>
