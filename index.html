@@ -33,9 +33,6 @@
         .requisito { margin: 4px 0; }
         .requisito.cumplido { color: green; }
         .requisito.incumplido { color: red; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .badge-success { background-color: #d4edda; color: #155724; }
-        .badge-danger { background-color: #f8d7da; color: #721c24; }
         .codigo-verif { background-color: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-top: 15px; }
     </style>
 </head>
@@ -134,7 +131,6 @@
         let usuariosDB = JSON.parse(localStorage.getItem('usuarios_agricovet_v2')) || {};
         let inventarioDB = JSON.parse(localStorage.getItem('inventario_agricovet_oficial'));
         
-        // Variables de verificación
         let codigoEnviadoActual = null;
         let correoEnVerificacion = null;
         let contrasenaEnVerificacion = null;
@@ -145,7 +141,6 @@
             localStorage.setItem('inventario_agricovet_oficial', JSON.stringify(inventarioDB));
         }
 
-        // ====== FUNCIONES DE VALIDACIÓN ======
         function validarContraseña() {
             let pass = document.getElementById('reg-pass').value;
             
@@ -182,7 +177,6 @@
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
 
-        // ====== SISTEMA DE REGISTRO CON VERIFICACIÓN ======
         function mostrarRegistro() {
             document.getElementById('panel-login').style.display = 'none';
             document.getElementById('panel-registro').style.display = 'block';
@@ -212,7 +206,6 @@
 
             document.getElementById('reg-error').style.display = 'none';
 
-            // Validaciones
             if (!correo || !pass || !passConf) {
                 document.getElementById('reg-error').innerText = "Completa todos los campos.";
                 document.getElementById('reg-error').style.display = 'block';
@@ -243,28 +236,18 @@
                 return;
             }
 
-            // Generar y guardar código
             codigoEnviadoActual = generarCodigoVerificacion();
             correoEnVerificacion = correo;
             contrasenaEnVerificacion = pass;
             intentosFallidos = 0;
 
-            // Mostrar loading
             document.getElementById('reg-cargando').style.display = 'block';
 
-            // Enviar email con Formspree
             enviarEmailVerificacion(correo, codigoEnviadoActual);
         }
 
         function enviarEmailVerificacion(correo, codigo) {
-            const datos = {
-                email: correo,
-                subject: "Código de Verificación - Agricovet Guatemala",
-                message: `Tu código de verificación es: ${codigo}\n\nEste código expira en 10 minutos.`
-            };
-
-            // Usar Formspree para enviar el email
-            fetch('https://formspree.io/f/xyzaqlqg', {
+            fetch('https://formspree.io/f/xlgvoyav', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -277,13 +260,12 @@
                 document.getElementById('reg-cargando').style.display = 'none';
                 
                 if (response.ok) {
-                    // Mostrar paso de verificación
                     document.getElementById('paso-registro').style.display = 'none';
                     document.getElementById('paso-verificacion').style.display = 'block';
                     document.getElementById('correo-verif-mostrar').innerText = `Código enviado a: ${correo}`;
                     document.getElementById('codigo-verif').focus();
                     
-                    console.log('Código de verificación:', codigo); // Para testing
+                    console.log('Código para testing:', codigo);
                 } else {
                     document.getElementById('reg-error').innerText = "Error al enviar el código. Intenta de nuevo.";
                     document.getElementById('reg-error').style.display = 'block';
@@ -293,7 +275,6 @@
                 document.getElementById('reg-cargando').style.display = 'none';
                 document.getElementById('reg-error').innerText = "Error de conexión. Verifica tu internet.";
                 document.getElementById('reg-error').style.display = 'block';
-                console.error('Error:', error);
             });
         }
 
@@ -318,4 +299,29 @@
                     return;
                 }
 
-                document.getElementById('verif-error').innerText = `Código incorrecto. Reintentos: $
+                document.getElementById('verif-error').innerText = `Código incorrecto. Reintentos: ${reintentos}/3`;
+                document.getElementById('verif-error').style.display = 'block';
+                document.getElementById('contador-reintentos').innerText = `Reintentos: ${reintentos}/3`;
+                return;
+            }
+
+            document.getElementById('verif-exito').style.display = 'block';
+            
+            usuariosDB[correoEnVerificacion] = {
+                password: contrasenaEnVerificacion,
+                registrado_en: new Date().toISOString(),
+                verificado: true
+            };
+            localStorage.setItem('usuarios_agricovet_v2', JSON.stringify(usuariosDB));
+
+            setTimeout(() => {
+                mostrarLogin();
+                alert('¡Registro completado! Ya puedes iniciar sesión.');
+            }, 1500);
+        }
+
+        function reenviarCodigo() {
+            if (!correoEnVerificacion) return;
+            
+            codigoEnviadoActual = generarCodigoVerificacion();
+            i
