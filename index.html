@@ -139,3 +139,189 @@
         if (!inventarioDB || inventarioDB.length === 0) {
             inventarioDB = listaOficial.map(nombre => ({ nombre: nombre, stock: 0, foto: nombre + ".PNG" }));
             localStorage.setItem('inventario_agricovet_oficial', JSON.stringify(inventarioDB));
+        }
+
+        function validarContraseña() {
+            let pass = document.getElementById('reg-pass').value;
+            
+            let largo = pass.length >= 8;
+            let mayuscula = /[A-Z]/.test(pass);
+            let numero = /[0-9]/.test(pass);
+            let especial = /[!@#$%^&*]/.test(pass);
+
+            document.getElementById('req-largo').classList.toggle('cumplido', largo);
+            document.getElementById('req-largo').classList.toggle('incumplido', !largo);
+            document.getElementById('icon-largo').innerText = largo ? '✓' : '✗';
+
+            document.getElementById('req-mayuscula').classList.toggle('cumplido', mayuscula);
+            document.getElementById('req-mayuscula').classList.toggle('incumplido', !mayuscula);
+            document.getElementById('icon-mayuscula').innerText = mayuscula ? '✓' : '✗';
+
+            document.getElementById('req-numero').classList.toggle('cumplido', numero);
+            document.getElementById('req-numero').classList.toggle('incumplido', !numero);
+            document.getElementById('icon-numero').innerText = numero ? '✓' : '✗';
+
+            document.getElementById('req-especial').classList.toggle('cumplido', especial);
+            document.getElementById('req-especial').classList.toggle('incumplido', !especial);
+            document.getElementById('icon-especial').innerText = especial ? '✓' : '✗';
+
+            return largo && mayuscula && numero && especial;
+        }
+
+        function validarCorreo(correo) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(correo);
+        }
+
+        function generarCodigoVerificacion() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        function mostrarRegistro() {
+            document.getElementById('panel-login').style.display = 'none';
+            document.getElementById('panel-registro').style.display = 'block';
+            document.getElementById('paso-registro').style.display = 'block';
+            document.getElementById('paso-verificacion').style.display = 'none';
+            limpiarMensajes();
+        }
+
+        function mostrarLogin() {
+            document.getElementById('panel-registro').style.display = 'none';
+            document.getElementById('panel-login').style.display = 'block';
+            limpiarMensajes();
+        }
+
+        function limpiarMensajes() {
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('reg-error').style.display = 'none';
+            document.getElementById('verif-error').style.display = 'none';
+            document.getElementById('verif-exito').style.display = 'none';
+            document.getElementById('reg-cargando').style.display = 'none';
+        }
+
+        function enviarCodigoVerificacion() {
+            let correo = document.getElementById('reg-correo').value.toLowerCase().trim();
+            let pass = document.getElementById('reg-pass').value;
+            let passConf = document.getElementById('reg-pass-conf').value;
+
+            document.getElementById('reg-error').style.display = 'none';
+
+            if (!correo || !pass || !passConf) {
+                document.getElementById('reg-error').innerText = "Completa todos los campos.";
+                document.getElementById('reg-error').style.display = 'block';
+                return;
+            }
+
+            if (!validarCorreo(correo)) {
+                document.getElementById('reg-error').innerText = "Correo inválido. Usa formato: usuario@dominio.com";
+                document.getElementById('reg-error').style.display = 'block';
+                return;
+            }
+
+            if (usuariosDB[correo]) {
+                document.getElementById('reg-error').innerText = "Este correo ya está registrado.";
+                document.getElementById('reg-error').style.display = 'block';
+                return;
+            }
+
+            if (!validarContraseña()) {
+                document.getElementById('reg-error').innerText = "La contraseña no cumple los requisitos.";
+                document.getElementById('reg-error').style.display = 'block';
+                return;
+            }
+
+            if (pass !== passConf) {
+                document.getElementById('reg-error').innerText = "Las contraseñas no coinciden.";
+                document.getElementById('reg-error').style.display = 'block';
+                return;
+            }
+
+            codigoEnviadoActual = generarCodigoVerificacion();
+            correoEnVerificacion = correo;
+            contrasenaEnVerificacion = pass;
+            intentosFallidos = 0;
+
+            document.getElementById('reg-cargando').style.display = 'block';
+
+            enviarEmailVerificacion(correo, codigoEnviadoActual);
+        }
+
+        function enviarEmailVerificacion(correo, codigo) {
+            fetch('https://formspree.io/f/xlgvoyav', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: correo,
+                    codigo: codigo,
+                    asunto: "Código de Verificación - Agricovet Guatemala"
+                })
+            })
+            .then(response => {
+                document.getElementById('reg-cargando').style.display = 'none';
+                
+                if (response.ok) {
+                    document.getElementById('paso-registro').style.display = 'none';
+                    document.getElementById('paso-verificacion').style.display = 'block';
+                    document.getElementById('correo-verif-mostrar').innerText = `Código enviado a: ${correo}`;
+                    document.getElementById('codigo-verif').focus();
+                    
+                    console.log('Código para testing:', codigo);
+                } else {
+                    document.getElementById('reg-error').innerText = "Error al enviar el código. Intenta de nuevo.";
+                    document.getElementById('reg-error').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                document.getElementById('reg-cargando').style.display = 'none';
+                document.getElementById('reg-error').innerText = "Error de conexión. Verifica tu internet.";
+                document.getElementById('reg-error').style.display = 'block';
+            });
+        }
+
+        function verificarCodigo() {
+            let codigoIngresado = document.getElementById('codigo-verif').value;
+            document.getElementById('verif-error').style.display = 'none';
+
+            if (codigoIngresado === "") {
+                document.getElementById('verif-error').innerText = "Ingresa el código.";
+                document.getElementById('verif-error').style.display = 'block';
+                return;
+            }
+
+            if (codigoIngresado !== codigoEnviadoActual) {
+                intentosFallidos++;
+                let reintentos = 3 - intentosFallidos;
+                
+                if (reintentos <= 0) {
+                    document.getElementById('verif-error').innerText = "Agotaste los intentos. Solicita un nuevo código.";
+                    document.getElementById('verif-error').style.display = 'block';
+                    document.getElementById('codigo-verif').disabled = true;
+                    return;
+                }
+
+                document.getElementById('verif-error').innerText = `Código incorrecto. Reintentos: ${reintentos}/3`;
+                document.getElementById('verif-error').style.display = 'block';
+                document.getElementById('contador-reintentos').innerText = `Reintentos: ${reintentos}/3`;
+                return;
+            }
+
+            document.getElementById('verif-exito').style.display = 'block';
+            
+            usuariosDB[correoEnVerificacion] = {
+                password: contrasenaEnVerificacion,
+                registrado_en: new Date().toISOString(),
+                verificado: true
+            };
+            localStorage.setItem('usuarios_agricovet_v2', JSON.stringify(usuariosDB));
+
+            setTimeout(() => {
+                mostrarLogin();
+                alert('¡Registro completado! Ya puedes iniciar sesión.');
+            }, 1500);
+        }
+
+        function reenviarCodigo() {
+            if (!correoEnVerificacion) return;
+            
+            codigoEnviadoActual = generarCodigoVerificacion();
+            i
